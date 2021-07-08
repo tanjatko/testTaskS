@@ -4,11 +4,11 @@ import com.wix.mysql.EmbeddedMysql;
 import com.wix.mysql.config.MysqldConfig;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.test.task.config.TestConfig;
 import org.test.task.utils.DbClient;
 import org.testng.annotations.AfterSuite;
 import org.testng.annotations.BeforeSuite;
 
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.sql.SQLException;
@@ -21,49 +21,38 @@ import static com.wix.mysql.config.MysqldConfig.aMysqldConfig;
 import static com.wix.mysql.distribution.Version.v5_6_23;
 
 public class BaseTest {
-    WebDriver driver ;
-    EmbeddedMysql mysqld ;
-    DbClient dbclient;
-    String url = "";
-    int port;
-    String password = "";
-    String userName = "";
+    protected WebDriver driver;
+    protected EmbeddedMysql mysql;
+    protected TestConfig testConfig;
 
     @BeforeSuite
     public void init() throws IOException {
-        File file = new File("test.properties");
-        FileInputStream fileInput = new FileInputStream(file);
-        Properties properties = new Properties();
-        properties.load(fileInput);
-        fileInput.close();
-
-        url = properties.getProperty("url");
-        port = Integer.parseInt(properties.getProperty("port"));
-        password = properties.getProperty("password");
-        userName = properties.getProperty("userName");
+            try (FileInputStream fileInput = new FileInputStream("test.properties")) {
+                Properties properties = new Properties();
+                properties.load(fileInput);
+                testConfig = new TestConfig(properties);
+            }
 
         System.setProperty("webdriver.chrome.driver", "/Users/botanjatko/Downloads/chromedriver");
         driver = new ChromeDriver();
         driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
 
         MysqldConfig config = aMysqldConfig(v5_6_23)
-                .withUser(userName, password)
-                .withPort(port)
+                .withUser(testConfig.getUserName(), testConfig.getPassword())
+                .withPort(testConfig.getPort())
                 .build();
-
-        mysqld = anEmbeddedMysql(config)
+        mysql = anEmbeddedMysql(config)
                 .addSchema("aschema", classPathScript("db/db_init.sql"))
                 .start();
-
-        dbclient = new DbClient("jdbc:mysql://localhost:"+ port+ "/aschema?" +
-                "user="+ userName+ "&password=" + password);
     }
 
     @AfterSuite
     public void tearDown() throws SQLException, IOException {
+        DbClient dbclient = new DbClient("jdbc:mysql://localhost:" + testConfig.getPort() + "/aschema?" +
+                "user=" + testConfig.getUserName() + "&password=" + testConfig.getPassword());
         driver.close();
         dbclient.showResultsFromDatabase();
         dbclient.close();
-        mysqld.stop();
+        mysql.stop();
     }
 }

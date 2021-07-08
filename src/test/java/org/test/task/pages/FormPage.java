@@ -19,13 +19,13 @@ public class FormPage {
     private By fieldPhone = By.id("p_phone");
     private By selectMenu = By.xpath("//*[@for = \"p_message\"]/following::select");
     private By txtNameMessage = By.xpath("//*[@id=\"p_name\"]/following-sibling::*//li");
-    private By txtEmailMessage  = By.xpath("//*[@id=\"p_email\"]/following-sibling::*//li");
+    private By txtEmailMessage = By.xpath("//*[@id=\"p_email\"]/following-sibling::*//li");
 
-    public FormPage(WebDriver driver){
+    public FormPage(WebDriver driver) {
         this.driver = driver;
     }
 
-    public void open(){
+    public void open() {
         driver.get(url);
     }
 
@@ -33,39 +33,43 @@ public class FormPage {
         driver.findElement(submitButton).submit();
     }
 
-    public Boolean isTextForMessagePresent(String text){
+    public Boolean isTextForMessagePresent(String text) {
         return isTextPresent(txtMessage, text);
     }
 
-    public Boolean isTextForNamePresent(String text){
+    public Boolean isTextForNamePresent(String text) {
         return isTextPresent(txtNameMessage, text);
     }
 
-    public Boolean isTextForEmailPresent(String text){
+    public Boolean isTextForEmailPresent(String text) {
         return isTextPresent(txtEmailMessage, text);
     }
 
-    private Boolean isTextPresent(By elementLocator, String text){
-       return  (new WebDriverWait(driver, 10))
+    private Boolean isTextPresent(By elementLocator, String text) {
+        return (new WebDriverWait(driver, 10))
                 .until(ExpectedConditions.textToBe(elementLocator, text));
     }
 
-    public void selectBoxMenu(int index){
+    public void selectBoxMenu(int index) {
         WebElement element = (new WebDriverWait(driver, 10))
                 .until(ExpectedConditions.elementToBeClickable(selectMenu));
         Select dropdown = new Select(element);
         dropdown.selectByIndex(index);
     }
 
-    public void fillOutFullName(String name){
-       driver.findElement(fieldFullName).sendKeys(name);
+    public void fillOutFullName(String name) {
+        driver.findElement(fieldFullName).sendKeys(name);
     }
 
-    public void fillOutEmail(String email){
+    public void fillOutEmail(String email) {
         driver.findElement(fieldEmail).sendKeys(email);
     }
 
-    public void fillOutAdress(String adress) { driver.findElement(fieldAdress).sendKeys(adress); }
+    public void fillOutAdress(String adress) {
+        driver.findElement(fieldAdress).sendKeys(adress);
+    }
 
-    public void fillOutPhone(String phone) { driver.findElement(fieldPhone).sendKeys(phone); }
+    public void fillOutPhone(String phone) {
+        driver.findElement(fieldPhone).sendKeys(phone);
+    }
 }

@@ -1,6 +1,5 @@
 package org.test.task.utils;
 
-import org.test.task.BaseTest;
 import org.testng.ITestContext;
 import org.testng.ITestResult;
 import org.testng.TestListenerAdapter;
@@ -11,36 +10,45 @@ import java.util.Arrays;
 import java.util.Date;
 
 public class DbTestListener extends TestListenerAdapter {
-    int id = 1;
+    int id = 0;
 
     @Override
     public void onFinish(ITestContext testContext) {
         DbClient dbclient = new DbClient("jdbc:mysql://localhost:6033/aschema?" +
-                "user=tetiana"+"&password=123456"); // rework
-        for (ITestResult tr:testContext.getPassedTests().getAllResults()
-             ) {
-            Date date=new Date(tr.getStartMillis());
+                "user=tetiana" + "&password=123456"); // rework
+        for (ITestResult tr : testContext.getPassedTests().getAllResults() //only for passed tests!!!
+        ) {
+            Date date = new Date(tr.getStartMillis());
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             String currentTime = sdf.format(date);
             try {
-               dbclient.execute(" INSERT INTO test_results values("+ id +",\"" + currentTime
-                     + "\", \"" +tr.getName() +"\", \"" + convertStatusCode(tr.getStatus()) + "\", \"" +
-                       Arrays.toString(tr.getParameters())+"\");");
-                id++;
+                dbclient.execute(" INSERT INTO test_results values(" + id + ",\"" + currentTime
+                        + "\", \"" + tr.getName() + "\", \"" + convertStatusCode(tr.getStatus()) + "\", \"" +
+                        Arrays.toString(tr.getParameters()) + "\");");
             } catch (SQLException throwables) {
                 throwables.printStackTrace();
             }
         }
     }
 
-    private String convertStatusCode (int code){
+    private String convertStatusCode(int code) {
         String answer;
-        switch (code){
-            case 1: answer = "Success"; break;
-            case 2: answer = "Failure"; break;
-            case 3: answer = "Skip"; break;
-            case 4: answer = "Success_percentage_failure"; break;
-            default: answer = "Started"; break;
+        switch (code) {
+            case 1:
+                answer = "Success";
+                break;
+            case 2:
+                answer = "Failure";
+                break;
+            case 3:
+                answer = "Skip";
+                break;
+            case 4:
+                answer = "Success_percentage_failure";
+                break;
+            default:
+                answer = "Started";
+                break;
         }
         return answer;
     }

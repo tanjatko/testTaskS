@@ -6,8 +6,8 @@ import java.sql.*;
 
 public class DbClient implements Closeable {
     private final Connection conn;
-    private  Statement stmt;
-    private  ResultSet rs;
+    private Statement stmt;
+    private ResultSet rs;
 
     public DbClient(String connectionString) {
         try {
@@ -34,7 +34,7 @@ public class DbClient implements Closeable {
         stmt = conn.createStatement();
         rs = stmt.executeQuery("SELECT * FROM test_results");
         System.out.println("Output from database: ");
-        System.out.println("|   id  |        startDate        |      testName       |    Status   |    Parameters  "    );
+        System.out.println("|   id  |        startDate        |      testName       |    Status   |    Parameters  ");
         while (rs.next()) {
             System.out.print("|   ");
             System.out.print(rs.getString(1));
