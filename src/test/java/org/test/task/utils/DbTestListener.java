@@ -8,6 +8,7 @@ import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.Set;
 
 public class DbTestListener extends TestListenerAdapter {
     int id = 0;
@@ -16,7 +17,16 @@ public class DbTestListener extends TestListenerAdapter {
     public void onFinish(ITestContext testContext) {
         DbClient dbclient = new DbClient("jdbc:mysql://localhost:6033/aschema?" +
                 "user=tetiana" + "&password=123456"); // rework
-        for (ITestResult tr : testContext.getPassedTests().getAllResults() //only for passed tests!!!
+        addToDatabase(testContext.getPassedTests().getAllResults() , dbclient);
+        addToDatabase(testContext.getFailedTests().getAllResults(), dbclient);
+        addToDatabase(testContext.getSkippedTests().getAllResults(), dbclient);
+        addToDatabase(testContext.getFailedButWithinSuccessPercentageTests().getAllResults(), dbclient);
+
+    }
+
+    private void addToDatabase(Set<ITestResult> testResults, DbClient dbclient)
+    {
+        for (ITestResult tr : testResults
         ) {
             Date date = new Date(tr.getStartMillis());
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
