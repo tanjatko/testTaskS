@@ -12,6 +12,8 @@ import org.testng.annotations.BeforeSuite;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
@@ -33,7 +35,7 @@ public class BaseTest {
                 testConfig = new TestConfig(properties);
             }
 
-        System.setProperty("webdriver.chrome.driver", "/Users/botanjatko/Downloads/chromedriver");
+        System.setProperty("webdriver.chrome.driver", testConfig.getPathDriver());
         driver = new ChromeDriver();
         driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
 
@@ -48,11 +50,30 @@ public class BaseTest {
 
     @AfterSuite
     public void tearDown() throws SQLException, IOException {
-        DbClient dbclient = new DbClient("jdbc:mysql://localhost:" + testConfig.getPort() + "/aschema?" +
-                "user=" + testConfig.getUserName() + "&password=" + testConfig.getPassword());
         driver.close();
-        dbclient.showResultsFromDatabase();
-        dbclient.close();
+        showResultsListFromDb();
         mysql.stop();
     }
+
+    private void showResultsListFromDb() throws SQLException, IOException {
+        DbClient dbclient = new DbClient(testConfig.getMysqlconnectionstring() + testConfig.getPort() + "/aschema?" +
+                "user=" + testConfig.getUserName() + "&password=" + testConfig.getPassword());
+        List<Map<String, String>> listOfResults = dbclient.getTestResults();
+        List<String> listOfColumnNames  = dbclient.getColumnNames();
+
+        for (String columnName: listOfColumnNames) {
+            System.out.print("|     ");
+            System.out.print(columnName + "     ");
+        }
+
+        for(Map<String, String> listItem : listOfResults){
+            System.out.println();
+            for (String columnName: listOfColumnNames) {
+                System.out.print("|     ");
+                System.out.print(listItem.get(columnName) + "       ");
+            }
+        }
+        dbclient.close();
+    }
+
 }

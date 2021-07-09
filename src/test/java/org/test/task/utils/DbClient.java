@@ -3,6 +3,10 @@ package org.test.task.utils;
 import java.io.Closeable;
 import java.io.IOException;
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class DbClient implements Closeable {
     private final Connection conn;
@@ -30,23 +34,34 @@ public class DbClient implements Closeable {
         stmt.execute(command);
     }
 
-    public void showResultsFromDatabase() throws SQLException {
+    public List<Map<String, String>> getTestResults() throws SQLException {
         stmt = conn.createStatement();
         rs = stmt.executeQuery("SELECT * FROM test_results");
-        System.out.println("Output from database: ");
-        System.out.println("|   id  |        startDate        |      testName       |    Status   |    Parameters  ");
+
+        List<Map<String, String>> listTestResults = new ArrayList<>();
         while (rs.next()) {
-            System.out.print("|   ");
-            System.out.print(rs.getString(1));
-            System.out.print("   |   ");
-            System.out.print(rs.getString(2));
-            System.out.print("   |   ");
-            System.out.print(rs.getString(3));
-            System.out.print("   |   ");
-            System.out.print(rs.getString(4));
-            System.out.print("   |   ");
-            System.out.println(rs.getString(5));
+            Map<String, String> map = new HashMap<>();
+            for (int i=1; i<=rs.getMetaData().getColumnCount(); i++) {
+                 map.put(getColumnName(rs, i), rs.getString(i));
+
+                 }
+            listTestResults.add(map);
         }
+        return listTestResults;
+    }
+
+    private String getColumnName(ResultSet rs, int index) throws SQLException {
+        return rs.getMetaData().getColumnName(index);
+    }
+
+    public List<String> getColumnNames() throws SQLException {
+       List<String> listOfColumnNames = new ArrayList<>();
+
+        for (int i=1; i<=rs.getMetaData().getColumnCount(); i++)
+        {
+            listOfColumnNames.add(rs.getMetaData().getColumnName(i));
+        }
+        return listOfColumnNames;
     }
 
     @Override
